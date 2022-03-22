@@ -1,8 +1,6 @@
-import { Connection, ConnectionOptions, createConnection, EntityManager, ObjectType, Repository } from 'typeorm';
+import { Connection, createConnection} from 'typeorm';
 import { logger } from '../utils';
-import { APPLICATION_CONFIG } from '../application-config';
 import { DataSource } from './datasource';
-import { Flavour, Vm } from '../models';
 
 export class TypeORMDataSource implements DataSource {
   static dataSourceName = 'typeorm';

@@ -48,6 +48,7 @@ export class ProxmoxService implements CloudProvider {
                 throw error;
             }
             if (axios.isAxiosError(error)) {
+                logger.error(error.toJSON());
                 throw new HttpException(`${error.message} | ${error.response?.statusText}`, error?.response?.status);
             }
         });
@@ -152,6 +153,7 @@ export class ProxmoxService implements CloudProvider {
 
         return {
             id: "" + resource.vmid,
+            uid: resource.vmid,
             name: resource.name || resource.id,
             state: CloudInstanceState[instanceDb.status],
             flavourId: instanceDb.flavourId,
@@ -191,6 +193,7 @@ export class ProxmoxService implements CloudProvider {
             const securityGroups = [];
             return {
                 id: resource.vmid,
+                uid: resource.vmid,
                 name: resource.id,
                 state: resource.status,
                 flavourId: instanceDb.flavourId,

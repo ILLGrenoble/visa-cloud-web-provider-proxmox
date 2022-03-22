@@ -3,6 +3,7 @@ import {CloudInstanceState} from "./instance-state.model";
 
 export interface Instance {
     id: string;
+    uid: string;
     name: string;
     state: CloudInstanceState;
     flavourId: string;

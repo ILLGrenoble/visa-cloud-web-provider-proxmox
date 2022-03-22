@@ -16,7 +16,11 @@ export class ApplicationConfig {
     };
 
     database: {
-        path: string;
+        host: string,
+        database: string,
+        schema: string,
+        username: string,
+        password: string,
     }
 
     constructor(data?: Partial<ApplicationConfig>) {
@@ -43,7 +47,11 @@ export function APPLICATION_CONFIG(): ApplicationConfig {
                 }
             },
             database: {
-                path: process.env.TYPEORM_DATABASE
+                host: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_HOST,
+                database: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_DATABASE,
+                schema: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_SCHEMA,
+                username: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_USERNAME,
+                password: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_PASSWORD,
             }
         };
     }
