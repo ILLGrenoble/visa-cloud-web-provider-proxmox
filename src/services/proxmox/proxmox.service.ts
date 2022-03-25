@@ -7,6 +7,7 @@ import { DBService } from "../database/db.service";
 import { HttpException } from "../../exceptions";
 import yaml from "js-yaml";
 import { APPLICATION_CONFIG } from "../../application-config";
+import { Mutex } from "async-mutex";
 
 
 @singleton()
@@ -15,6 +16,7 @@ export class ProxmoxService implements CloudProvider {
     private readonly _client: AxiosInstance;
     private readonly _dbService: DBService;
     private readonly _selectCoeff: number;
+    private readonly _instanceCreationMutex: Mutex;
     /**
      * Create a new proxmox service
      */
@@ -28,6 +30,7 @@ export class ProxmoxService implements CloudProvider {
         this._client = this.createClient(proxmoxEndpoint, timeout, PVEAPIToken);
         this._dbService = dbService;
         this._selectCoeff = selectCoeff;
+        this._instanceCreationMutex = new Mutex();
     }
 
     /**
@@ -275,73 +278,75 @@ export class ProxmoxService implements CloudProvider {
         securityGroups: string[],
         metadata: Map<string, string>,
         bootCommand: string): Promise<string> {
-        logger.info(`Creating new instance: ${name}`);
+        return await this._instanceCreationMutex.runExclusive(async () => {
+            logger.info(`Creating new instance: ${name}`);
 
-        const flavour = await this._dbService.getFlavour(flavourId);
-        const image = (await this.getImageInternal(imageId));
+            const flavour = await this._dbService.getFlavour(flavourId);
+            const image = (await this.getImageInternal(imageId));
 
-        const node = await this._selectBestNode(flavour.cpus, flavour.ram);
+            const node = await this._selectBestNode(flavour.cpus, flavour.ram);
 
-        const vmId = (await this._client.get('cluster/nextid')).data.data;
+            const vmId = (await this._client.get('cluster/nextid')).data.data;
 
-        await this._dbService.createInstance(vmId, name, flavourId, imageId, metadata, bootCommand);
+            await this._dbService.createInstance(vmId, name, flavourId, imageId, metadata, bootCommand);
 
-        // send infos to metadata server
-        axios.post(APPLICATION_CONFIG().proxmox.metadataServer + vmId,
-            {
-                metadata: yaml.dump({
-                    meta: metadata,
-                    project_id: APPLICATION_CONFIG().proxmox.projectId
-                }),
-                userdata: "#cloud-config\n" + yaml.dump({
-                    runcmd: [bootCommand],
-                    fqdn: `${APPLICATION_CONFIG().proxmox.instancePrefix.toLowerCase()}-${vmId}`
-                })
-            }).catch(error => {
-                console.error(`Cannot send metadata: ${error}`);
-                throw new Error(`Cannot send metadata: ${error}`);
-            }).then(() => console.log('metadata sent'));
+            // send infos to metadata server
+            axios.post(APPLICATION_CONFIG().proxmox.metadataServer + vmId,
+                {
+                    metadata: yaml.dump({
+                        meta: metadata,
+                        project_id: APPLICATION_CONFIG().proxmox.projectId
+                    }),
+                    userdata: "#cloud-config\n" + yaml.dump({
+                        runcmd: [bootCommand],
+                        fqdn: `${APPLICATION_CONFIG().proxmox.instancePrefix.toLowerCase()}-${vmId}`
+                    })
+                }).catch(error => {
+                    console.error(`Cannot send metadata: ${error}`);
+                    throw new Error(`Cannot send metadata: ${error}`);
+                }).then(() => console.log('metadata sent'));
 
-        // need to get template node
-        const templateNode = image.node;
-        const cloneUrl = `nodes/${templateNode}/${image.id}/clone`;
-        const cloneRes = (await this._client.post(cloneUrl, { newid: vmId, name: name, target: node })).data.data;
+            // need to get template node
+            const templateNode = image.node;
+            const cloneUrl = `nodes/${templateNode}/${image.id}/clone`;
+            const cloneRes = (await this._client.post(cloneUrl, { newid: vmId, name: name, target: node })).data.data;
 
-        let vmCloned: boolean = false;
+            let vmCloned: boolean = false;
 
-        // This one need to be synchronous (can't configure before clone is finished), we can't use checkTask
-        do {
-            const taskRes = (await this._client.get(`cluster/tasks`)).data.data;
-            const task = taskRes.find(t => t.upid == cloneRes);
-            if (task.status == 'OK') {
-                vmCloned = true;
-            }
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        } while (!vmCloned);
+            // This one need to be synchronous (can't configure before clone is finished), we can't use checkTask
+            do {
+                const taskRes = (await this._client.get(`cluster/tasks`)).data.data;
+                const task = taskRes.find(t => t.upid == cloneRes);
+                if (task.status == 'OK') {
+                    vmCloned = true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } while (!vmCloned);
 
-        const newInstanceUrl = `nodes/${node}/qemu/${vmId}/config`;
-        await this._client.post(newInstanceUrl, {
-            agent: 'enabled=1',
-            cores: flavour.cpus,
-            memory: flavour.ram * 1024,
-            ostype: 'l26',
-            bootdisk: 'scsi0',
-            serial0: 'socket',
-            smbios1: `base64=1,serial=${Buffer.from('ds=nocloud-net;s=' + APPLICATION_CONFIG().proxmox.metadataServer + vmId + '/').toString('base64')}`,
-        });
-
-        securityGroups.forEach((group) => {
-            const firewallRuleUrl = `nodes/${node}/qemu/${vmId}/firewall/rules`;
-            this._client.post(firewallRuleUrl, {
-                action: group,
-                type: "group",
-                comment: "Security group from VISA"
+            const newInstanceUrl = `nodes/${node}/qemu/${vmId}/config`;
+            await this._client.post(newInstanceUrl, {
+                agent: 'enabled=1',
+                cores: flavour.cpus,
+                memory: flavour.ram * 1024,
+                ostype: 'l26',
+                bootdisk: 'scsi0',
+                serial0: 'socket',
+                smbios1: `base64=1,serial=${Buffer.from('ds=nocloud-net;s=' + APPLICATION_CONFIG().proxmox.metadataServer + vmId + '/').toString('base64')}`,
             });
-        })
 
-        this.startInstance(vmId);
+            securityGroups.forEach((group) => {
+                const firewallRuleUrl = `nodes/${node}/qemu/${vmId}/firewall/rules`;
+                this._client.post(firewallRuleUrl, {
+                    action: group,
+                    type: "group",
+                    comment: "Security group from VISA"
+                });
+            })
 
-        return vmId;
+            this.startInstance(vmId);
+
+            return vmId;
+        });
     }
 
     /**
