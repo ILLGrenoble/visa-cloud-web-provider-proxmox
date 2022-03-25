@@ -15,6 +15,7 @@ export class CloudInitService {
         this._connectionPromise = createConnection({
             type: "postgres",
             host: APPLICATION_CONFIG().database.host,
+            port: APPLICATION_CONFIG().database.port,
             database: APPLICATION_CONFIG().database.database,
             schema: APPLICATION_CONFIG().database.schema,
             username: APPLICATION_CONFIG().database.username,

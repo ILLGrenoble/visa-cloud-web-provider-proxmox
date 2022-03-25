@@ -16,10 +16,8 @@ import {container} from "./ioc";
 export class Application {
 
     private _server: http.Server;
-    private _datasource: DataSource = new TypeORMDataSource();
 
     constructor() {
-        this._init();
     }
 
     async start(): Promise<null> {
@@ -31,7 +29,6 @@ export class Application {
             const router = express.Router();
             router.use(express.json());
 
-            await this._datasource.start();
 
             router.use(authenticationMiddleware);
 
@@ -93,20 +90,13 @@ export class Application {
         if (this._server) {
             logger.info('Stopping http server...');
             this._server.close();
-
-            await this._datasource.stop(); 
+ 
 
             logger.info('... http server stopped');
             this._server = null;
         }
 
         return null;
-    }
-
-    private _init() {
-      container.register<DataSource>("DataSource", {
-        useValue: this._datasource
-      });
     }
 
 

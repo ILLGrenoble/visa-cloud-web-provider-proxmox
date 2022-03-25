@@ -1,7 +1,9 @@
 import { singleton } from "tsyringe";
 import { Flavour, Vm } from "../../models";
+import { APPLICATION_CONFIG } from "../../application-config";
 import { Connection, createConnection } from "typeorm";
 import yaml from "js-yaml";
+import { logger } from "../../utils";
 
 @singleton()
 export class DBService {
@@ -10,7 +12,18 @@ export class DBService {
 
     constructor(
     ) {
-        createConnection().then((conn) => {
+        createConnection({
+            type: "postgres",
+            host: APPLICATION_CONFIG().database.host,
+            database: APPLICATION_CONFIG().database.database,
+            port: APPLICATION_CONFIG().database.port,
+            schema: APPLICATION_CONFIG().database.schema,
+            username: APPLICATION_CONFIG().database.username,
+            password: APPLICATION_CONFIG().database.password,
+            entities: [Flavour, Vm],
+            synchronize: true,
+            logging: true
+        }).then((conn) => {
             // @ts-ignore
             this._connection = conn;
         });

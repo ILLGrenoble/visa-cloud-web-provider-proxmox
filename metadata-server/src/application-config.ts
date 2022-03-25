@@ -17,6 +17,7 @@ export class ApplicationConfig {
 
     database: {
         host: string,
+        port: number,
         database: string,
         schema: string,
         username: string,
@@ -48,6 +49,7 @@ export function APPLICATION_CONFIG(): ApplicationConfig {
             },
             database: {
                 host: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_HOST,
+                port: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_PORT == null ? 5432 : +process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_PORT,
                 database: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_DATABASE,
                 schema: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_SCHEMA,
                 username: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_USERNAME,

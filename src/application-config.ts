@@ -28,6 +28,15 @@ export class ApplicationConfig {
         maxStartRetry: number;
     };
 
+    database: {
+        host: string,
+        port: number,
+        database: string,
+        schema: string,
+        username: string,
+        password: string,
+    }
+
     constructor(data?: Partial<ApplicationConfig>) {
         Object.assign(this, data);
     }
@@ -62,6 +71,14 @@ export function APPLICATION_CONFIG(): ApplicationConfig {
                 projectId: process.env.VISA_WEB_PROVIDER_PROXMOX_PROJECT_ID,
                 instancePrefix: process.env.VISA_CLOUD_SERVER_NAME_PREFIX == null ? 'VISA_INSTANCE' : process.env.VISA_CLOUD_SERVER_NAME_PREFIX,
                 maxStartRetry: process.env.VISA_CLOUD_SERVER_MAX_START_RETRY == null ? 10 : parseInt(process.env.VISA_CLOUD_SERVER_MAX_START_RETRY)
+            },
+            database: {
+                host: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_HOST,
+                port: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PORT == null ? 5432 : +process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PORT,
+                database: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_DATABASE,
+                schema: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_SCHEMA,
+                username: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_USERNAME,
+                password: process.env.VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PASSWORD,
             },
         };
     }

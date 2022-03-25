@@ -47,11 +47,12 @@ The following environment variables are used to configure VISA Cloud Web Provide
 | VISA_WEB_PROVIDER_PROXMOX_PROJECT_ID |  | Unique ID that you can choose and will be passe to the instance. It can be used to distinguish between dev/preprod/prod env. |
 | VISA_CLOUD_SERVER_NAME_PREFIX | 'VISA_INSTANCE' | Prefix for instance name in proxmox |
 | VISA_CLOUD_SERVER_MAX_START_RETRY | 10 | Proxmox sometime return that a clone is finished before it's true, and so we try to start it too early. This parameter allows to retry multiple time before deciding that there's a problem. |
-| TYPEORM_HOST |  | Postgres host for connector database |
-| TYPEORM_USERNAME |  | Postgres username for connector database |
-| TYPEORM_PASSWORD |  | Postgres password for connector database |
-| TYPEORM_DATABASE |  | Postgres database for connector database |
-| TYPEORM_SCHEMA |  | Postgres schema for connector database |
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_HOST |  | PostgreSQL host
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PORT | 5432 | PostgreSQL port
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_DATABASE |  | PostgreSQL database
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_SCHEMA |  | PostgreSQL schema
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_USERNAME |  | PostgreSQL username
+| VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PASSWORD |  | PostgreSQL password
 
 ## Metadata server
 
@@ -74,10 +75,12 @@ The metadata use SQLite for database. It contains no essential information, so i
 | VISA_WEB_PROVIDER_PROXMOX_LOG_SYSLOG_APP_NAME |  | The syslog application name (optional) |
 | VISA_WEB_PROVIDER_PROXMOX_SERVER_HOST | localhost | The hostname on which the server is listening on |
 | VISA_WEB_PROVIDER_PROXMOX_SERVER_PORT | 4001 | The port on which to run the server |
-| TYPEORM_CONNECTION | | Should be set to `sqlite` |
-| TYPEORM_DATABASE | | filename of the sqlite database |
-| TYPEORM_MIGRATIONS_DIR | | Should be set to `migrations` |
-| TYPEORM_MIGRATIONS | | Should be set to `migrations/*.js` |
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_HOST |  | PostgreSQL host
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_PORT | 5432 | PostgreSQL port
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_DATABASE |  | PostgreSQL database
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_SCHEMA |  | PostgreSQL schema
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_USERNAME |  | PostgreSQL username
+| VISA_WEB_PROVIDER_PROXMOX_METADATA_PASSWORD |  | PostgreSQL password
 
 
 ## Flavours
