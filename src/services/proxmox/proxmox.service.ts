@@ -51,7 +51,7 @@ export class ProxmoxService implements CloudProvider {
                 throw error;
             }
             if (axios.isAxiosError(error)) {
-                logger.error(error.toJSON());
+                logger.error(`Generic axios error : ${error.toJSON()}`);
                 throw new HttpException(`${error.message} | ${error.response?.statusText}`, error?.response?.status);
             }
         });
@@ -85,7 +85,7 @@ export class ProxmoxService implements CloudProvider {
                 setTimeout(this._checkTask.bind(this), 500, taskId, callback);
             }
         } catch (e) {
-            logger.error(e);
+            logger.error(`checkTask failed with error : ${e}`);
         }
     }
 
@@ -391,7 +391,7 @@ export class ProxmoxService implements CloudProvider {
             this._dbService.setStartCount(resource.id, vm.startCount + 1);
         } else {
             const errorMessage = `Start of vm ${id} failed after ${APPLICATION_CONFIG().proxmox.maxStartRetry} retries`;
-            logger.error(errorMessage);
+            logger.error(`Start instance failed with error ${errorMessage}`);
             throw new HttpException(errorMessage, 500);
         }
 
