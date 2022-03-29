@@ -51,7 +51,7 @@ export class ProxmoxService implements CloudProvider {
                 throw error;
             }
             if (axios.isAxiosError(error)) {
-                logger.error(`Generic axios error : ${error?.response?.status} | ${error.message} | ${error.response?.statusText}`);
+                logger.error(`Generic axios error : ${error?.response?.status} | ${error.message} | ${error.response?.statusText} | ${error.stack}`);
                 throw new HttpException(`${error.message} | ${error.response?.statusText}`, error?.response?.status);
             }
         });
