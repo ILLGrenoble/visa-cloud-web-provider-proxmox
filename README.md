@@ -45,7 +45,6 @@ The following environment variables are used to configure VISA Cloud Web Provide
 | VISA_WEB_PROVIDER_PROXMOX_SELECT_COEFF | 4294967296 | Ratio of CPU to ram for load balancing |
 | VISA_WEB_PROVIDER_PROXMOX_METADATA_SERVER |  | URL of the metadata server (must be accessible from the VM) |
 | VISA_WEB_PROVIDER_PROXMOX_PROJECT_ID |  | Unique ID that you can choose and will be passe to the instance. It can be used to distinguish between dev/preprod/prod env. |
-| VISA_CLOUD_SERVER_NAME_PREFIX | 'VISA_INSTANCE' | Prefix for instance name in proxmox |
 | VISA_CLOUD_SERVER_MAX_START_RETRY | 10 | Proxmox sometime return that a clone is finished before it's true, and so we try to start it too early. This parameter allows to retry multiple time before deciding that there's a problem. |
 | VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_HOST |  | PostgreSQL host
 | VISA_WEB_PROVIDER_PROXMOX_CONNECTOR_PORT | 5432 | PostgreSQL port

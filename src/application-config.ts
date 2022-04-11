@@ -24,7 +24,6 @@ export class ApplicationConfig {
         coeff: number;
         metadataServer: string;
         projectId: string;
-        instancePrefix: string;
         maxStartRetry: number;
     };
 
@@ -69,7 +68,6 @@ export function APPLICATION_CONFIG(): ApplicationConfig {
                 coeff: process.env.VISA_WEB_PROVIDER_PROXMOX_SELECT_COEFF == null ? 1024*1024*1024*4 : + process.env.VISA_WEB_PROVIDER_PROXMOX_SELECT_COEFF,
                 metadataServer: process.env.VISA_WEB_PROVIDER_PROXMOX_METADATA_SERVER,
                 projectId: process.env.VISA_WEB_PROVIDER_PROXMOX_PROJECT_ID,
-                instancePrefix: process.env.VISA_CLOUD_SERVER_NAME_PREFIX == null ? 'VISA_INSTANCE' : process.env.VISA_CLOUD_SERVER_NAME_PREFIX,
                 maxStartRetry: process.env.VISA_CLOUD_SERVER_MAX_START_RETRY == null ? 10 : parseInt(process.env.VISA_CLOUD_SERVER_MAX_START_RETRY)
             },
             database: {
