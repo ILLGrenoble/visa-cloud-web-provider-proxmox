@@ -143,6 +143,14 @@ export class ProxmoxService implements CloudProvider {
         try {
             const networkResult = (await this._client.get(networkUrl)).data.data.result;
             var vmIP = networkResult[1]["ip-addresses"].find(addr => addr["ip-address-type"] == "ipv4")["ip-address"];
+            if (!vmIP) {
+                const vmIP6 = networkResult[1]["ip-addresses"].find(addr => addr["ip-address-type"] == "ipv6")["ip-address"];
+                if (vmIP6) {
+                    const message = "Instance can't get an IP addresse, maybe the DHCP range is full?";
+                    logger.error(message);
+                    throw new HttpException(message, 500);
+                }
+            }
             if (instanceDb.status != CloudInstanceState.STOPPING.toString()) {
                 this._dbService.updateInstanceStatus(id, CloudInstanceState.ACTIVE);
                 instanceDb.status = CloudInstanceState.ACTIVE;
