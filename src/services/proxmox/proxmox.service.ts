@@ -52,7 +52,7 @@ export class ProxmoxService implements CloudProvider {
             }
             if (axios.isAxiosError(error)) {
                 const axiosError = error as AxiosError;
-                logger.error(`Generic axios error for request ${JSON.stringify(axiosError.toJSON())} : ${axiosError.response.status} | ${axiosError.message} | ${axiosError.response.statusText} | ${axiosError.stack}`);
+                logger.error(`Generic axios error for request ${JSON.stringify(axiosError.toJSON())} : ${axiosError.response?.status} | ${axiosError.message} | ${axiosError.response?.statusText} | ${axiosError.stack}`);
                 throw new HttpException(`${error.message} | ${error.response?.statusText}`, error?.response?.status);
             }
         });
@@ -300,7 +300,9 @@ export class ProxmoxService implements CloudProvider {
             await this._dbService.createInstance(vmId, name, flavourId, imageId, metadata, bootCommand);
 
             // send infos to metadata server
-            axios.post(APPLICATION_CONFIG().proxmox.metadataServer + vmId,
+            const metadataUrl = APPLICATION_CONFIG().proxmox.metadataServer + vmId;
+            logger.info('Sending metadata to ' + metadataUrl);
+            axios.post(metadataUrl,
                 {
                     metadata: yaml.dump({
                         meta: metadata,
@@ -311,7 +313,7 @@ export class ProxmoxService implements CloudProvider {
                         fqdn: name
                     })
                 }).catch(error => {
-                    console.error(`Cannot send metadata: ${error}`);
+                    logger.error(`Cannot send metadata: ${error}`);
                     throw new Error(`Cannot send metadata: ${error}`);
                 }).then(() => console.log('metadata sent'));
 

@@ -22,7 +22,6 @@ export class DBService {
             password: APPLICATION_CONFIG().database.password,
             entities: [Flavour, Vm],
             synchronize: true,
-            logging: true
         }).then((conn) => {
             // @ts-ignore
             this._connection = conn;
